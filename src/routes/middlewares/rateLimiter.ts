@@ -2,10 +2,9 @@ import { Request, Response, NextFunction } from 'express';
 import { RateLimiterRedis } from 'rate-limiter-flexible';
 import Redis from 'ioredis';
 
-import rateLimiterConfig from '../../config/rateLimiter';
 import AppError from '../../errors/AppError';
 
-const rateLimiterRedis = new Redis(rateLimiterConfig.options);
+const rateLimiterRedis = new Redis(process.env.REDIS_URL);
 const limiter = new RateLimiterRedis({
   storeClient: rateLimiterRedis,
   keyPrefix: 'rateLimit',

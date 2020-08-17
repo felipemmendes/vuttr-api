@@ -1,8 +1,6 @@
 import Redis from 'ioredis';
 
-import cacheConfig from '../../config/cache';
-
-const cacheClient = new Redis(cacheConfig.options);
+const cacheClient = new Redis(process.env.REDIS_URL);
 
 const invalidateCachePrefix = async (prefix: string): Promise<void> => {
   const keys = await cacheClient.keys(prefix);
