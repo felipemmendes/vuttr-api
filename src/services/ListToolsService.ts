@@ -12,13 +12,8 @@ interface Request {
   };
 }
 
-interface Response {
-  tools: Tool[];
-  toolsCount: number;
-}
-
 class ListToolsService {
-  public async execute({ user_id, query }: Request): Promise<Response> {
+  public async execute({ user_id, query }: Request): Promise<Tool[]> {
     const toolsRepository = getRepository(Tool);
     const { q, tags_like, page } = query;
     const cacheKey = `user-tools:${user_id}:${q}-${tags_like}-${page}`;
@@ -33,7 +28,7 @@ class ListToolsService {
 
     const qQuery = `%${q || tags_like || ''}%`;
 
-    const [tools, toolsCount] = await toolsRepository
+    const tools = await toolsRepository
       .createQueryBuilder('tool')
       .where('tool.user_id = :user_id', { user_id })
       .andWhere(
@@ -48,13 +43,11 @@ class ListToolsService {
         }),
       )
       .orderBy('tool.created_at', 'DESC')
-      .take(10)
-      .skip(page ? 10 * page - 10 : 0)
-      .getManyAndCount();
+      .getMany();
 
     cacheClient.set(cacheKey, JSON.stringify(tools));
 
-    return { tools, toolsCount };
+    return tools;
   }
 }
 
